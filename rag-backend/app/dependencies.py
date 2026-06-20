@@ -3,9 +3,8 @@ import jwt
 from fastapi import Header, HTTPException, status
 
 JWT_SHARED_SECRET = os.environ.get("JWT_SHARED_SECRET")
-# Fallback to dev key if not provided
 if not JWT_SHARED_SECRET:
-    JWT_SHARED_SECRET = "dev_jwt_shared_secret_secure_key_12345"
+    raise RuntimeError("JWT_SHARED_SECRET environment variable is missing")
 
 def get_current_user(authorization: str = Header(...)):
   if not authorization.startswith("Bearer "):

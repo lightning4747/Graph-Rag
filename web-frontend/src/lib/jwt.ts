@@ -1,8 +1,9 @@
 import { SignJWT, jwtVerify } from 'jose';
 
-const secret = new TextEncoder().encode(
-  process.env.JWT_SHARED_SECRET || 'dev_jwt_shared_secret_secure_key_12345'
-);
+if (!process.env.JWT_SHARED_SECRET) {
+  throw new Error("JWT_SHARED_SECRET environment variable is not defined");
+}
+const secret = new TextEncoder().encode(process.env.JWT_SHARED_SECRET);
 
 export interface UserPayload {
   user_id: string;
@@ -35,7 +36,7 @@ export const JWT_COOKIE_NAME = 'token';
 
 export const JWT_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: true,
+  secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict' as const,
   maxAge: 28800, // 8 hours in seconds
   path: '/',
