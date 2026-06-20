@@ -1,9 +1,12 @@
 import { SignJWT, jwtVerify } from 'jose';
 
-if (!process.env.JWT_SHARED_SECRET) {
-  throw new Error("JWT_SHARED_SECRET environment variable is not defined");
+function getSecret() {
+  const jwtSecret = process.env.JWT_SHARED_SECRET;
+  if (!jwtSecret) {
+    throw new Error("JWT_SHARED_SECRET environment variable is not defined");
+  }
+  return new TextEncoder().encode(jwtSecret);
 }
-const secret = new TextEncoder().encode(process.env.JWT_SHARED_SECRET);
 
 export interface UserPayload {
   user_id: string;
@@ -20,11 +23,11 @@ export async function issueJwt(user: UserPayload): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('8h')
-    .sign(secret);
+    .sign(getSecret());
 }
 
 export async function decodeJwt(token: string): Promise<UserPayload> {
-  const { payload } = await jwtVerify(token, secret);
+  const { payload } = await jwtVerify(token, getSecret());
   return {
     user_id: payload.user_id as string,
     role: payload.role as 'doctor' | 'reviewer' | 'admin',
