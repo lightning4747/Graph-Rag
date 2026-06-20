@@ -1,0 +1,10 @@
+[
+  {
+    "drug_a": "RXN_6809",
+    "drug_b": "RXN_855332",
+    "severity": "Moderate",
+    "mechanism": "Concomitant use may increase risk of lactic acidosis.",
+    "source_id": "FDA_REF_2024_08",
+    "fda_warning": "Monitor renal function closely."
+  }
+]

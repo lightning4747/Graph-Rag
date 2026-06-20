@@ -1,0 +1,37 @@
+[
+  {
+    "condition_id": "ICD10_I10",
+    "condition_name": "Essential Hypertension",
+    "clinical_status": "Chronic",
+    "treatments": [
+      {
+        "rxnorm_code": "RXN_197361",
+        "base_dosage": "5mg",
+        "frequency": "QD (Once Daily)",
+        "max_daily_limit": "10mg",
+        "route": "Oral"
+      },
+      {
+        "rxnorm_code": "RXN_6809",
+        "base_dosage": "10mg",
+        "frequency": "QD (Once Daily)",
+        "max_daily_limit": "40mg",
+        "route": "Oral"
+      }
+    ]
+  },
+  {
+    "condition_id": "ICD10_E11",
+    "condition_name": "Type 2 Diabetes Mellitus",
+    "clinical_status": "Chronic",
+    "treatments": [
+      {
+        "rxnorm_code": "RXN_855332",
+        "base_dosage": "500mg",
+        "frequency": "BID (Twice Daily)",
+        "max_daily_limit": "2000mg",
+        "route": "Oral"
+      }
+    ]
+  }
+]

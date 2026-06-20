@@ -1,0 +1,26 @@
+[
+  {
+    "rxnorm_code": "RXN_855332",
+    "generic_name": "Metformin",
+    "brand_name": "Glucophage",
+    "drug_class": "Biguanide",
+    "availability_status": "Available",
+    "fda_pregnancy_category": "B"
+  },
+  {
+    "rxnorm_code": "RXN_197361",
+    "generic_name": "Amlodipine",
+    "brand_name": "Norvasc",
+    "drug_class": "Calcium Channel Blocker",
+    "availability_status": "Available",
+    "fda_pregnancy_category": "C"
+  },
+  {
+    "rxnorm_code": "RXN_6809",
+    "generic_name": "Lisinopril",
+    "brand_name": "Zestril",
+    "drug_class": "ACE Inhibitor",
+    "availability_status": "Shortage",
+    "fda_pregnancy_category": "D"
+  }
+]

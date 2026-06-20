@@ -1,0 +1,28 @@
+================================================================================
+PATIENT LOG: CASE_9942A
+================================================================================
+Encounter Date: 2026-06-15
+Encounter Type: Routine Outpatient Clinic
+Patient Demographics: Born in 1961, Biological Sex: Male.
+
+CHIEF COMPLAINT & OBSERVATIONS:
+Patient presents today complaining of progressive polyuria and polydipsia
+over the past 3 weeks. Vital signs taken during admission indicate an
+elevated blood pressure reading of 145/92 mmHg.
+
+DIAGNOSTIC ASSESSMENT:
+Point-of-care HbA1c testing was executed, returning an abnormal value of
+7.9%, confirming a diagnosis of Type 2 Diabetes Mellitus (ICD10_E11).
+Concurrently, historical notes confirm a baseline chronic condition of
+Essential Hypertension (ICD10_I10).
+
+PLAN & PRESCRIPTIONS:
+To manage the newly diagnosed Type 2 Diabetes, I am initiating a
+prescription for Metformin (RxNorm: RXN_855332). The target dose is 500mg
+taken orally twice daily (BID). Patient instructed to monitor blood glucose
+daily. For his elevated blood pressure, his active prescription for
+Amlodipine 5mg daily will be maintained. He is to return in 4 weeks for a
+repeat metabolic panel.
+
+Signed: Dr. Vignesh T, MD
+================================================================================
