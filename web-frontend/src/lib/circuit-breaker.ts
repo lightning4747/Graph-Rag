@@ -1,4 +1,5 @@
 import CircuitBreaker from 'opossum';
+import { withRetry } from './retry';
 
 interface CallBackendParams {
   path: string;
@@ -7,34 +8,36 @@ interface CallBackendParams {
 }
 
 const backendRequest = async ({ path, body, token }: CallBackendParams) => {
-  const backendUrl = `${process.env.RAG_BACKEND_URL || 'http://rag-backend:8000'}${path}`;
-  
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-  
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  const response = await fetch(backendUrl, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok) {
-    let errorDetail = '';
-    try {
-      const errJson = await response.json();
-      errorDetail = errJson.detail || errJson.error || '';
-    } catch {
-      // ignore
+  return await withRetry(async () => {
+    const backendUrl = `${process.env.RAG_BACKEND_URL || 'http://rag-backend:8000'}${path}`;
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
-    throw new Error(errorDetail || `Backend responded with status: ${response.status}`);
-  }
 
-  return await response.json();
+    const response = await fetch(backendUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      let errorDetail = '';
+      try {
+        const errJson = await response.json();
+        errorDetail = errJson.detail || errJson.error || '';
+      } catch {
+        // ignore
+      }
+      throw new Error(errorDetail || `Backend responded with status: ${response.status}`);
+    }
+
+    return await response.json();
+  });
 };
 
 const options = {
