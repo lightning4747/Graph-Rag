@@ -57,6 +57,19 @@ def normalize_whitespace(text: str) -> str:
         return ""
     return " ".join(text.split())
 
+def clean_target_for_check(text: str) -> str:
+    """Lowercase, collapse whitespace, and strip trailing punctuation from target string."""
+    if not text:
+        return ""
+    cleaned = " ".join(text.lower().split())
+    return cleaned.rstrip(".,;!?:")
+
+def clean_source_for_check(text: str) -> str:
+    """Lowercase and collapse whitespace for source document."""
+    if not text:
+        return ""
+    return " ".join(text.lower().split())
+
 def verify_prescription(
     extraction: ExtractedPrescription,
     source_text: str,
@@ -69,9 +82,9 @@ def verify_prescription(
     errors = []
     checks_passed = 0
     
-    normalized_source = normalize_whitespace(source_text)
-    normalized_dose = normalize_whitespace(extraction.dose_amount_text)
-    normalized_sentence = normalize_whitespace(extraction.source_sentence)
+    normalized_source = clean_source_for_check(source_text)
+    normalized_dose = clean_target_for_check(extraction.dose_amount_text)
+    normalized_sentence = clean_target_for_check(extraction.source_sentence)
 
     # 1. Verbatim check: dose amount in source text
     if extraction.dose_amount_text and normalized_dose in normalized_source:
@@ -124,8 +137,8 @@ def verify_condition(
     errors = []
     checks_passed = 0
 
-    normalized_source = normalize_whitespace(source_text)
-    normalized_sentence = normalize_whitespace(extraction.source_sentence)
+    normalized_source = clean_source_for_check(source_text)
+    normalized_sentence = clean_target_for_check(extraction.source_sentence)
 
     # 1. Verbatim check: source sentence in source text
     if extraction.source_sentence and normalized_sentence in normalized_source:
@@ -168,9 +181,9 @@ def verify_observation(
     has_source_sentence = False
     has_value_text = False
 
-    normalized_source = normalize_whitespace(source_text)
-    normalized_sentence = normalize_whitespace(extraction.source_sentence)
-    normalized_value = normalize_whitespace(extraction.value_text)
+    normalized_source = clean_source_for_check(source_text)
+    normalized_sentence = clean_target_for_check(extraction.source_sentence)
+    normalized_value = clean_target_for_check(extraction.value_text)
 
     # 1. Verbatim check: source sentence in source text
     if extraction.source_sentence and normalized_sentence in normalized_source:

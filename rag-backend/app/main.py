@@ -18,10 +18,12 @@ app.add_middleware(
 
 # Ingestion router imports
 from app.ingestion.router import router as ingestion_router
-# from app.query.router import router as query_router
+from app.query.router import router as query_router
+from app.ingestion.quarantine_router import router as quarantine_router
 
 app.include_router(ingestion_router, prefix="/api/v1/ingest", tags=["Ingestion"])
-# app.include_router(query_router, prefix="/api/v1/query", tags=["Query"])
+app.include_router(query_router, prefix="/api/v1/query", tags=["Query"])
+app.include_router(quarantine_router, prefix="/api/v1/quarantine", tags=["Quarantine"])
 
 @app.get("/")
 def read_root():

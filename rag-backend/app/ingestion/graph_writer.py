@@ -46,6 +46,8 @@ def write_prescription(
     extraction: ExtractedPrescription,
     encounter_id: str,
     confidence: float,
+    extraction_method: str = "llm_verified",
+    verified_by: str = "system",
 ):
     """Write verified Prescription and link to static Medication node."""
     if not driver:
@@ -62,9 +64,9 @@ def write_prescription(
                 frequency: $frequency,
                 status: 'Active',
                 source_sentence: $source_sentence,
-                extraction_method: 'llm_verified',
+                extraction_method: $extraction_method,
                 extraction_confidence: $confidence,
-                verified_by: 'system'
+                verified_by: $verified_by
             })
             CREATE (e)-[:RESULTED_IN]->(rx)
             CREATE (rx)-[:SPECIFIES_DRUG]->(m)
@@ -75,12 +77,16 @@ def write_prescription(
             frequency=extraction.frequency_text,
             source_sentence=extraction.source_sentence,
             confidence=confidence,
+            extraction_method=extraction_method,
+            verified_by=verified_by,
         )
 
 def write_condition_link(
     extraction: ExtractedCondition,
     encounter_id: str,
     confidence: float,
+    extraction_method: str = "llm_verified",
+    verified_by: str = "system",
 ):
     """Write verified Condition link to static Condition node."""
     if not driver:
@@ -96,8 +102,9 @@ def write_condition_link(
                 type: 'Diagnosis',
                 value: $condition_text,
                 source_sentence: $source_sentence,
-                extraction_method: 'llm_verified',
-                extraction_confidence: $confidence
+                extraction_method: $extraction_method,
+                extraction_confidence: $confidence,
+                verified_by: $verified_by
             })
             CREATE (e)-[:RECORDED]->(obs)
             CREATE (obs)-[:CONFIRMS_DIAGNOSIS]->(c)
@@ -107,12 +114,16 @@ def write_condition_link(
             condition_text=extraction.condition_mentioned_text,
             source_sentence=extraction.source_sentence,
             confidence=confidence,
+            extraction_method=extraction_method,
+            verified_by=verified_by,
         )
 
 def write_observation(
     extraction: ExtractedObservation,
     encounter_id: str,
     confidence: float,
+    extraction_method: str = "llm_verified",
+    verified_by: str = "system",
 ):
     """Write verified generic Observation and link to Encounter."""
     if not driver:
@@ -127,8 +138,9 @@ def write_observation(
                 type: $obs_type,
                 value: $value,
                 source_sentence: $source_sentence,
-                extraction_method: 'llm_verified',
-                extraction_confidence: $confidence
+                extraction_method: $extraction_method,
+                extraction_confidence: $confidence,
+                verified_by: $verified_by
             })
             CREATE (e)-[:RECORDED]->(obs)
             """,
@@ -137,4 +149,6 @@ def write_observation(
             value=extraction.value_text,
             source_sentence=extraction.source_sentence,
             confidence=confidence,
+            extraction_method=extraction_method,
+            verified_by=verified_by,
         )
