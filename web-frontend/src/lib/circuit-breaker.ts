@@ -9,6 +9,8 @@ interface CallBackendParams {
 }
 
 const backendRequest = async ({ path, body, method = 'POST', token }: CallBackendParams) => {
+  // maxAttempts=1: retries must NOT happen inside the circuit breaker's timeout window.
+  // If the request fails, the breaker counts it as a failure and handles backoff via resetTimeout.
   return await withRetry(async () => {
     const backendUrl = `${process.env.RAG_BACKEND_URL || 'http://rag-backend:8000'}${path}`;
     
@@ -43,10 +45,12 @@ const backendRequest = async ({ path, body, method = 'POST', token }: CallBacken
     }
 
     return await response.json();
-  });
+  }, 1); // maxAttempts=1 — no retry inside the circuit window
 };
 
 const options = {
+  // 30 s: LLM intent classification + response generation via OpenRouter takes 5–10 s.
+  // The spec's original 5 s was written for fast local APIs — this overrides it for the hosted LLM.
   timeout: 30000,
   errorThresholdPercentage: 50,
   resetTimeout: 30000,

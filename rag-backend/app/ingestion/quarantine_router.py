@@ -21,6 +21,9 @@ dsn = os.environ.get("AUTH_DB_DSN")
 
 @router.get("")
 def get_quarantined_items(
+    # spec/plan.md §Phase 6 calls this ?status=pending_review
+    # Legacy param ?status_filter= also accepted for backwards compatibility
+    status: Optional[str] = None,
     status_filter: Optional[str] = "pending_review",
     current_user: dict = Depends(get_current_user)
 ):
@@ -32,6 +35,9 @@ def get_quarantined_items(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Role is not authorized to access quarantine review console"
         )
+    
+    # Resolve effective filter: 'status' param (spec) takes precedence over legacy 'status_filter'
+    effective_status = status or status_filter or "pending_review"
         
     if not dsn:
         raise RuntimeError("AUTH_DB_DSN environment variable is not set")
@@ -46,7 +52,7 @@ def get_quarantined_items(
                 WHERE status = %s
                 ORDER BY created_at DESC
                 """,
-                (status_filter,)
+                (effective_status,)
             )
             rows = cur.fetchall()
             results = []
