@@ -3,11 +3,12 @@ import { withRetry } from './retry';
 
 interface CallBackendParams {
   path: string;
-  body: any;
+  body?: any;
+  method?: string;
   token?: string;
 }
 
-const backendRequest = async ({ path, body, token }: CallBackendParams) => {
+const backendRequest = async ({ path, body, method = 'POST', token }: CallBackendParams) => {
   return await withRetry(async () => {
     const backendUrl = `${process.env.RAG_BACKEND_URL || 'http://rag-backend:8000'}${path}`;
     
@@ -19,11 +20,16 @@ const backendRequest = async ({ path, body, token }: CallBackendParams) => {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(backendUrl, {
-      method: 'POST',
+    const fetchOptions: RequestInit = {
+      method,
       headers,
-      body: JSON.stringify(body),
-    });
+    };
+
+    if (method !== 'GET' && method !== 'HEAD' && body !== undefined) {
+      fetchOptions.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(backendUrl, fetchOptions);
 
     if (!response.ok) {
       let errorDetail = '';
@@ -50,9 +56,9 @@ const options = {
 
 const breaker = new CircuitBreaker(backendRequest, options);
 
-export async function callBackend(path: string, body: any, token?: string) {
+export async function callBackend(path: string, body?: any, token?: string, method: string = 'POST') {
   try {
-    return await breaker.fire({ path, body, token });
+    return await breaker.fire({ path, body, method, token });
   } catch (error: any) {
     if (breaker.opened || error?.code === 'EOPENBREAKER' || error?.message === 'OpenCircuitError') {
       return {
@@ -64,3 +70,4 @@ export async function callBackend(path: string, body: any, token?: string) {
     throw error;
   }
 }
+
