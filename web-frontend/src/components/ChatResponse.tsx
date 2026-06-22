@@ -63,22 +63,34 @@ export default function ChatResponse({ response }: ChatResponseProps) {
 
       {type === 'unknown_intent' && (
         <div className={styles.unknown}>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-            <line x1="12" y1="17" x2="12.01" y2="17" />
-          </svg>
-          <span>{text}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            <strong>No matching query template for that question.</strong>
+          </div>
+          <p style={{ fontSize: '13px', marginBottom: '10px', opacity: 0.8 }}>
+            This system only answers specific clinical question types. Try rephrasing as one of:
+          </p>
+          <ul style={{ fontSize: '13px', paddingLeft: '18px', lineHeight: '1.8', opacity: 0.85 }}>
+            <li><strong>Dosage lookup</strong> — &ldquo;What is the max dose of Metformin for Type 2 Diabetes?&rdquo;</li>
+            <li><strong>Drug interactions</strong> — &ldquo;Are there interactions between Metformin and Amlodipine?&rdquo;</li>
+            <li><strong>Active prescriptions</strong> — &ldquo;Show active prescriptions for this patient.&rdquo; (+ Patient ID)</li>
+            <li><strong>Contraindications</strong> — &ldquo;What are the contraindications for Amlodipine?&rdquo;</li>
+            <li><strong>Treatment options</strong> — &ldquo;What medications treat Type 2 Diabetes?&rdquo;</li>
+          </ul>
         </div>
       )}
 

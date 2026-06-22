@@ -116,6 +116,19 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
     }
   };
 
+  const EXAMPLE_QUERIES = [
+    { label: 'Dosage lookup', q: 'What is the max dose of Metformin for Type 2 Diabetes?', pid: '' },
+    { label: 'Drug interactions', q: 'Are there any interactions between Metformin and Amlodipine?', pid: '' },
+    { label: 'Active prescriptions', q: 'Show active prescriptions for this patient.', pid: 'CASE_9942A' },
+    { label: 'Contraindications', q: 'What are the contraindications for Amlodipine?', pid: '' },
+    { label: 'Treatment options', q: 'What medications treat Type 2 Diabetes?', pid: '' },
+  ];
+
+  const fillExample = (q: string, pid: string) => {
+    setQuestion(q);
+    if (pid) setPatientId(pid);
+  };
+
   const getRoleBadgeClass = (role: string) => {
     if (role === 'doctor') return styles.badgeDoctor;
     if (role === 'reviewer') return styles.badgeReviewer;
@@ -239,9 +252,42 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
             <div className={styles.welcomeCard}>
               <h2 className={styles.welcomeTitle}>Welcome, {user.role === 'admin' ? 'Administrator' : 'Doctor'}</h2>
               <p className={styles.welcomeText}>
-                Access real-time patient regimen checks, dosage validations, and potential interaction audits.
-                All responses are grounded directly in structured clinical records and verified for numeric safety.
+                Ask clinical questions about dosage limits, drug interactions, active prescriptions, contraindications,
+                or treatment options. All answers are grounded in structured graph records and number-verified.
               </p>
+              <div style={{ marginTop: '20px' }}>
+                <p style={{ fontSize: '12px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>
+                  Try an example
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {EXAMPLE_QUERIES.map((ex) => (
+                    <button
+                      key={ex.label}
+                      type="button"
+                      onClick={() => fillExample(ex.q, ex.pid)}
+                      style={{
+                        textAlign: 'left',
+                        background: 'transparent',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        padding: '10px 14px',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                        color: '#334155',
+                        transition: 'all 0.15s ease',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '2px',
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.borderColor = '#3b82f6')}
+                      onMouseLeave={e => (e.currentTarget.style.borderColor = '#e2e8f0')}
+                    >
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{ex.label}{ex.pid ? ` · Patient ID: ${ex.pid}` : ''}</span>
+                      <span>{ex.q}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
             messages.map((msg) => (
@@ -330,7 +376,7 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
                       handleAsk(e);
                     }
                   }}
-                  placeholder="Ask a clinical question (e.g. 'What is the max dose of Metformin?')"
+                  placeholder="e.g. 'What is the max dose of Metformin for Type 2 Diabetes?' — or click an example above"
                   className={styles.textarea}
                   required
                   disabled={isLoading}
