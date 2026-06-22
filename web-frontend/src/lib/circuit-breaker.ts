@@ -47,7 +47,7 @@ const backendRequest = async ({ path, body, method = 'POST', token }: CallBacken
 };
 
 const options = {
-  timeout: 5000,
+  timeout: 30000,
   errorThresholdPercentage: 50,
   resetTimeout: 30000,
   rollingCountTimeout: 10000,
