@@ -26,7 +26,8 @@ def generate_response(facts: list[dict], intent: str) -> str:
     )
     
     response = _openai.chat.completions.create(
-        model="openrouter/owl-alpha",
+        model="openai/gpt-4o-mini",
+        max_tokens=1000,
         temperature=0,
         messages=[{
             "role": "user",

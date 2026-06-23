@@ -48,8 +48,9 @@ def classify_intent(question: str) -> QueryIntent:
     )
     
     return _client.chat.completions.create(
-        model="openrouter/owl-alpha",
+        model="openai/gpt-4o-mini",
         response_model=QueryIntent,
+        max_tokens=1000,
         temperature=0,
         messages=[{
             "role": "user",

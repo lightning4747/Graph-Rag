@@ -50,8 +50,9 @@ def extract_structured(note_text: str) -> ExtractionResult:
     )
     
     return _client.chat.completions.create(
-        model="openrouter/owl-alpha",
+        model="openai/gpt-4o-mini",
         response_model=ExtractionResult,
+        max_tokens=4096,
         temperature=0,
         messages=[{
             "role": "user",
