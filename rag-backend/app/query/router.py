@@ -71,6 +71,24 @@ def execute_query(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Unsafe query pattern detected. Writing or calling procedures is not allowed."
             )
+
+        # Enforce patient scoping validation for patient-specific intents
+        if gen_result.intent == "active_prescriptions_for_patient":
+            if not request.patient_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Patient-scoped query requires a patient ID"
+                )
+            if gen_result.parameters.get("patient_id") != request.patient_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Unmatched patient ID in query parameters"
+                )
+            if "$patient_id" not in gen_result.cypher_query:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Unsafe patient-scoped query: query does not reference patient_id parameter"
+                )
             
         # Step 2: Execute dynamically generated Cypher query on Neo4j
         facts = execute_dynamic_cypher(gen_result.cypher_query, gen_result.parameters)

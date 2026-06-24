@@ -46,7 +46,7 @@ Relationships:
 
 Constraints & rules:
 1. Make parameter matching case-insensitive using toLower() (e.g., toLower(m.generic_name) CONTAINS toLower($drug) or toLower($drug) CONTAINS toLower(m.generic_name)).
-2. Return properties with aliases (e.g. `m.generic_name AS drug`, `t.base_dosage AS base_dosage`, `rx.dose_amount AS dose`, `i.severity AS severity`).
+2. Return properties with aliases. Make sure to bind relationships to variables (e.g. `-[t:CLINICALLY_TREATS]->`, `-[i:INTERACTS_WITH]-`) when returning their properties (e.g. `t.base_dosage AS base_dosage`, `i.severity AS severity`).
 3. If the query does not map to any logical schema query, set intent='unknown', cypher_query='', and parameters={}.
 """
 

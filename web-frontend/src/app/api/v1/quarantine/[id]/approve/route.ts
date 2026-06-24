@@ -24,12 +24,17 @@ export async function POST(
       token,
       'POST'
     );
+    if (data && data.type === 'circuit_open') {
+      return NextResponse.json(
+        { error: data.text },
+        { status: 503 }
+      );
+    }
     return NextResponse.json(data);
   } catch (error: any) {
     console.error('Quarantine approve proxy error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Internal Server Error' },
-      { status: 500 }
-    );
+    const status = error.status || 500;
+    const body = error.body || { error: error.message || 'Internal Server Error' };
+    return NextResponse.json(body, { status });
   }
 }

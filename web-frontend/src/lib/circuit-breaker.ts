@@ -35,13 +35,17 @@ const backendRequest = async ({ path, body, method = 'POST', token }: CallBacken
 
     if (!response.ok) {
       let errorDetail = '';
+      let errJson: any = null;
       try {
-        const errJson = await response.json();
+        errJson = await response.json();
         errorDetail = errJson.detail || errJson.error || '';
       } catch {
         // ignore
       }
-      throw new Error(errorDetail || `Backend responded with status: ${response.status}`);
+      const error = new Error(errorDetail || `Backend responded with status: ${response.status}`);
+      (error as any).status = response.status;
+      (error as any).body = errJson;
+      throw error;
     }
 
     return await response.json();
@@ -64,7 +68,7 @@ export async function callBackend(path: string, body?: any, token?: string, meth
   try {
     return await breaker.fire({ path, body, method, token });
   } catch (error: any) {
-    if (breaker.opened || error?.code === 'EOPENBREAKER' || error?.message === 'OpenCircuitError') {
+    if (error?.code === 'EOPENBREAKER' || error?.message === 'OpenCircuitError') {
       return {
         type: 'circuit_open',
         text: 'Backend is currently unavailable. Please try again in a moment.',

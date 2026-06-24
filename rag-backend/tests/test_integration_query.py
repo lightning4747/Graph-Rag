@@ -190,3 +190,52 @@ def test_execute_dynamic_cypher_read_only_enforcement():
         execute_dynamic_cypher("CALL apoc.warmup.run()", {})
 
 
+def test_query_pipeline_patient_scoping_enforcement(doctor_auth_header, monkeypatch):
+    client = TestClient(app)
+    
+    from app.query.cypher_generator import DynamicCypher
+    
+    # 1. Test case: request patient_id missing
+    monkeypatch.setattr(
+        "app.query.router.generate_cypher",
+        lambda question, patient_id: DynamicCypher(
+            intent="active_prescriptions_for_patient",
+            cypher_query="MATCH (p:Patient {patient_id: $patient_id}) RETURN p",
+            parameters={"patient_id": "CASE_9942A"}
+        )
+    )
+    payload = {"question": "Show active prescriptions"}
+    res = client.post("/api/v1/query", json=payload, headers=doctor_auth_header)
+    assert res.status_code == 400
+    assert "Patient-scoped query requires a patient ID" in res.json()["detail"]
+
+    # 2. Test case: parameters patient_id mismatch
+    monkeypatch.setattr(
+        "app.query.router.generate_cypher",
+        lambda question, patient_id: DynamicCypher(
+            intent="active_prescriptions_for_patient",
+            cypher_query="MATCH (p:Patient {patient_id: $patient_id}) RETURN p",
+            parameters={"patient_id": "DIFFERENT_ID"}
+        )
+    )
+    payload = {"question": "Show active prescriptions", "patient_id": "CASE_9942A"}
+    res = client.post("/api/v1/query", json=payload, headers=doctor_auth_header)
+    assert res.status_code == 400
+    assert "Unmatched patient ID in query parameters" in res.json()["detail"]
+
+    # 3. Test case: query missing $patient_id parameter reference
+    monkeypatch.setattr(
+        "app.query.router.generate_cypher",
+        lambda question, patient_id: DynamicCypher(
+            intent="active_prescriptions_for_patient",
+            cypher_query="MATCH (p:Patient) RETURN p",
+            parameters={"patient_id": "CASE_9942A"}
+        )
+    )
+    payload = {"question": "Show active prescriptions", "patient_id": "CASE_9942A"}
+    res = client.post("/api/v1/query", json=payload, headers=doctor_auth_header)
+    assert res.status_code == 400
+    assert "Unsafe patient-scoped query: query does not reference patient_id parameter" in res.json()["detail"]
+
+
+
