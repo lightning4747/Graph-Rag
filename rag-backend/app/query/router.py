@@ -49,6 +49,28 @@ def execute_query(
                 facts=[],
                 intent="unknown"
             )
+
+        # Enforce server-side read-only allowlist and safety patterns
+        ALLOWED_INTENTS = {
+            "drug_interaction_check",
+            "dosage_lookup",
+            "active_prescriptions_for_patient",
+            "contraindication_check",
+            "condition_treatment_options"
+        }
+        if gen_result.intent not in ALLOWED_INTENTS:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unauthorized query intent detected"
+            )
+
+        import re
+        write_patterns = r"\b(create|merge|set|delete|detach|remove|call)\b"
+        if re.search(write_patterns, gen_result.cypher_query, re.IGNORECASE):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unsafe query pattern detected. Writing or calling procedures is not allowed."
+            )
             
         # Step 2: Execute dynamically generated Cypher query on Neo4j
         facts = execute_dynamic_cypher(gen_result.cypher_query, gen_result.parameters)
@@ -62,6 +84,8 @@ def execute_query(
             facts=result["facts"],
             intent=result["intent"]
         )
+    except HTTPException as he:
+        raise he
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

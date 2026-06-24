@@ -128,3 +128,65 @@ def test_query_pipeline_hallucination_fallback(doctor_auth_header, monkeypatch):
     assert data["type"] == "fallback_raw_facts"
     assert "Unable to confidently phrase a summary" in data["text"]
     assert len(data["facts"]) > 0
+
+
+def test_query_pipeline_read_only_enforcement(doctor_auth_header, monkeypatch):
+    client = TestClient(app)
+    
+    from app.query.cypher_generator import DynamicCypher
+    
+    # 1. Test case: Unsafe write pattern (CREATE)
+    monkeypatch.setattr(
+        "app.query.router.generate_cypher",
+        lambda question, patient_id: DynamicCypher(
+            intent="dosage_lookup",
+            cypher_query="CREATE (m:Medication {generic_name: 'SuperDrug'}) RETURN m",
+            parameters={}
+        )
+    )
+    
+    payload = {"question": "Some query"}
+    res = client.post("/api/v1/query", json=payload, headers=doctor_auth_header)
+    assert res.status_code == 400
+    assert "Unsafe query pattern detected" in res.json()["detail"]
+
+    # 2. Test case: Unsafe write pattern (CALL procedure)
+    monkeypatch.setattr(
+        "app.query.router.generate_cypher",
+        lambda question, patient_id: DynamicCypher(
+            intent="dosage_lookup",
+            cypher_query="CALL apoc.periodic.iterate()",
+            parameters={}
+        )
+    )
+    res = client.post("/api/v1/query", json=payload, headers=doctor_auth_header)
+    assert res.status_code == 400
+    assert "Unsafe query pattern detected" in res.json()["detail"]
+
+    # 3. Test case: Unauthorized intent (allowlist check)
+    monkeypatch.setattr(
+        "app.query.router.generate_cypher",
+        lambda question, patient_id: DynamicCypher(
+            intent="malicious_intent_not_in_allowlist",
+            cypher_query="MATCH (m:Medication) RETURN m",
+            parameters={}
+        )
+    )
+    res = client.post("/api/v1/query", json=payload, headers=doctor_auth_header)
+    assert res.status_code == 400
+    assert "Unauthorized query intent detected" in res.json()["detail"]
+
+
+def test_execute_dynamic_cypher_read_only_enforcement():
+    from app.query.cypher_templates import execute_dynamic_cypher
+    
+    with pytest.raises(ValueError, match="Unsafe Cypher query rejected"):
+        execute_dynamic_cypher("CREATE (m:Medication) RETURN m", {})
+        
+    with pytest.raises(ValueError, match="Unsafe Cypher query rejected"):
+        execute_dynamic_cypher("MATCH (m:Medication) DETACH DELETE m", {})
+
+    with pytest.raises(ValueError, match="Unsafe Cypher query rejected"):
+        execute_dynamic_cypher("CALL apoc.warmup.run()", {})
+
+

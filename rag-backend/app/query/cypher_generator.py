@@ -61,12 +61,30 @@ def generate_cypher(question: str, patient_id: str | None = None) -> DynamicCyph
     if patient_id:
         prompt += f"PASSED PATIENT ID: {patient_id}\n"
 
-    return _client.chat.completions.create(
-        model="openrouter/owl-alpha",
-        response_model=DynamicCypher,
-        temperature=0,
-        messages=[{
-            "role": "user",
-            "content": prompt,
-        }],
-    )
+    try:
+        result = _client.chat.completions.create(
+            model="openrouter/owl-alpha",
+            response_model=DynamicCypher,
+            temperature=0,
+            messages=[{
+                "role": "user",
+                "content": prompt,
+            }],
+        )
+    except Exception:
+        return DynamicCypher(intent="unknown", cypher_query="", parameters={})
+
+    ALLOWED_INTENTS = {
+        "drug_interaction_check",
+        "dosage_lookup",
+        "active_prescriptions_for_patient",
+        "contraindication_check",
+        "condition_treatment_options"
+    }
+
+    if result.intent not in ALLOWED_INTENTS or not result.cypher_query:
+        result.intent = "unknown"
+        result.cypher_query = ""
+        result.parameters = {}
+
+    return result
