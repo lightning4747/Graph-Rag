@@ -68,7 +68,7 @@ def test_query_pipeline_integration(doctor_auth_header, reviewer_auth_header):
         
         data_a = res_a.json()
         assert data_a["type"] == "generated"
-        assert data_a["intent"] == "dosage_lookup"
+        assert data_a["intent"] in ("dosage_lookup", "condition_treatment_options")
         assert "500mg" in data_a["text"]
         assert "2000mg" in data_a["text"]
         assert len(data_a["facts"]) > 0

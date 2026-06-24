@@ -32,7 +32,7 @@ def get_quarantined_items(
     """
     if current_user.get("role") not in ("reviewer", "admin"):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail="Role is not authorized to access quarantine review console"
         )
     
@@ -84,7 +84,7 @@ def approve_quarantine_item(
     """
     if current_user.get("role") not in ("reviewer", "admin"):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail="Role is not authorized to approve quarantined items"
         )
         
@@ -101,12 +101,12 @@ def approve_quarantine_item(
             )
             row = cur.fetchone()
             if not row:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quarantine record not found")
+                raise HTTPException(status_code=404, detail="Quarantine record not found")
             note_id, current_status = row
             
             if current_status != "pending_review":
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
+                    status_code=400,
                     detail=f"Quarantine record is already {current_status} and cannot be approved"
                 )
                 
@@ -187,7 +187,7 @@ def reject_quarantine_item(
     """
     if current_user.get("role") not in ("reviewer", "admin"):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail="Role is not authorized to reject quarantined items"
         )
         
@@ -203,12 +203,12 @@ def reject_quarantine_item(
             )
             row = cur.fetchone()
             if not row:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quarantine record not found")
+                raise HTTPException(status_code=404, detail="Quarantine record not found")
             current_status = row[0]
             
             if current_status != "pending_review":
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
+                    status_code=400,
                     detail=f"Quarantine record is already {current_status} and cannot be rejected"
                 )
                 

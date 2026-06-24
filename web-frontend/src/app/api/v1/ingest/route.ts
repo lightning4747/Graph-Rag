@@ -3,6 +3,8 @@ import { cookies } from 'next/headers';
 import { callBackend } from '@/lib/circuit-breaker';
 import { JWT_COOKIE_NAME } from '@/lib/jwt';
 
+export const maxDuration = 180;
+
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();

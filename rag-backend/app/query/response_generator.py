@@ -4,7 +4,7 @@ from openai import OpenAI
 
 # Initialize OpenRouter-compatible client for plain generation
 _openrouter = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
+    base_url=os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api"),
     api_key=os.environ.get("OPENROUTER_API_KEY", "placeholder_key"),
 )
 _openai = _openrouter
@@ -26,8 +26,7 @@ def generate_response(facts: list[dict], intent: str) -> str:
     )
     
     response = _openai.chat.completions.create(
-        model="openai/gpt-4o-mini",
-        max_tokens=1000,
+        model="openrouter/owl-alpha",
         temperature=0,
         messages=[{
             "role": "user",

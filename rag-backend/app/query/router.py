@@ -3,8 +3,8 @@ from pydantic import BaseModel
 from typing import Literal, List, Optional, Dict, Any
 
 from app.dependencies import get_current_user
-from app.query.intent_classifier import classify_intent
-from app.query.cypher_templates import validate_entities, execute_template
+from app.query.cypher_generator import generate_cypher
+from app.query.cypher_templates import execute_dynamic_cypher
 from app.query.number_verifier import safe_respond
 
 router = APIRouter()
@@ -38,11 +38,11 @@ def execute_query(
     question_text = request.question.strip()
     
     try:
-        # Step 1: Classify Query Intent
-        intent = classify_intent(question_text)
+        # Step 1: Generate dynamic Cypher query and parameters
+        gen_result = generate_cypher(question_text, request.patient_id)
         
         # Guard: Check for unknown intent
-        if intent.intent == "unknown":
+        if gen_result.intent == "unknown" or not gen_result.cypher_query:
             return QueryResponse(
                 type="unknown_intent",
                 text="No matching query available for this question.",
@@ -50,25 +50,11 @@ def execute_query(
                 intent="unknown"
             )
             
-        # Merge patient_id from request body if intent requires it and it was provided
-        if intent.intent == "active_prescriptions_for_patient" and request.patient_id:
-            intent.entities["patient_id"] = request.patient_id.strip()
-            
-        # Step 2: Validate that all required entity keys are present
-        validation_err = validate_entities(intent)
-        if validation_err:
-            return QueryResponse(
-                type="unknown_intent",
-                text=validation_err,
-                facts=[],
-                intent=intent.intent
-            )
-            
-        # Step 3: Execute Parameterized Cypher Template
-        facts = execute_template(intent)
+        # Step 2: Execute dynamically generated Cypher query on Neo4j
+        facts = execute_dynamic_cypher(gen_result.cypher_query, gen_result.parameters)
         
-        # Step 4 & 5: Generate and verify natural language summary
-        result = safe_respond(facts, intent.intent)
+        # Step 3 & 4: Generate and verify natural language summary
+        result = safe_respond(facts, gen_result.intent)
         
         return QueryResponse(
             type=result["type"],

@@ -49,9 +49,9 @@ const backendRequest = async ({ path, body, method = 'POST', token }: CallBacken
 };
 
 const options = {
-  // 30 s: LLM intent classification + response generation via OpenRouter takes 5–10 s.
+  // 180 s: LLM intent classification + response generation via OpenRouter takes longer.
   // The spec's original 5 s was written for fast local APIs — this overrides it for the hosted LLM.
-  timeout: 30000,
+  timeout: 180000,
   errorThresholdPercentage: 50,
   resetTimeout: 30000,
   rollingCountTimeout: 10000,

@@ -28,7 +28,7 @@ class ExtractionResult(BaseModel):
 
 # Initialize OpenRouter-compatible client at module level
 _openrouter = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
+    base_url=os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api"),
     api_key=os.environ.get("OPENROUTER_API_KEY", "placeholder_key"),
 )
 _client = instructor.from_openai(_openrouter)
@@ -50,9 +50,8 @@ def extract_structured(note_text: str) -> ExtractionResult:
     )
     
     return _client.chat.completions.create(
-        model="openai/gpt-4o-mini",
+        model="openrouter/owl-alpha",
         response_model=ExtractionResult,
-        max_tokens=4096,
         temperature=0,
         messages=[{
             "role": "user",
