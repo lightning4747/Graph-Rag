@@ -2,11 +2,9 @@ name: Frontend CI
 
 on:
   push:
-    branches: [ main ]
     paths:
       - 'web-frontend/**'
   pull_request:
-    branches: [ main ]
     paths:
       - 'web-frontend/**'
 
@@ -33,12 +31,11 @@ jobs:
       - name: Install dependencies
         run: |
           cd web-frontend
-          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+          npm ci
 
       - name: Typecheck
         run: |
           cd web-frontend
-          # Run tsc if packages are installed
           npx tsc --noEmit
 
   build:
@@ -63,9 +60,10 @@ jobs:
       - name: Install dependencies
         run: |
           cd web-frontend
-          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+          npm ci
 
       - name: Run Build Verification
         run: |
           cd web-frontend
           npm run build
+
