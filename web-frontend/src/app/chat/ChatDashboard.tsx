@@ -410,7 +410,7 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
                 id="chat-submit-button"
                 type="submit"
                 className={styles.submitBtn}
-                disabled={!mounted || isLoading || !question.trim()}
+                disabled={mounted ? (isLoading || !question.trim()) : false}
               >
                 <span>Ask Portal</span>
                 <svg
