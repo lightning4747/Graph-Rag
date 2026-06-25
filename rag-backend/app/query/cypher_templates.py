@@ -25,7 +25,11 @@ def execute_dynamic_cypher(query: str, params: dict) -> list[dict]:
     if re.search(write_patterns, query, re.IGNORECASE):
         raise ValueError("Unsafe Cypher query rejected: write or procedure execution patterns are disallowed.")
         
-    with driver.session(default_access_mode="READ") as session:
-        result = session.run(query, **params)
+    def read_tx(tx):
+        result = tx.run(query, **params)
         return [record.data() for record in result]
+
+    with driver.session(default_access_mode="READ") as session:
+        return session.execute_read(read_tx)
+
 
