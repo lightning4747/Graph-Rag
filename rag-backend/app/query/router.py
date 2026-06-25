@@ -89,6 +89,25 @@ def execute_query(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Unsafe patient-scoped query: query does not reference patient_id parameter"
                 )
+
+        # Enforce parameter requirements for intents (REQUIRED_ENTITIES)
+        REQUIRED_ENTITIES = {
+            "drug_interaction_check": {"drug_a", "drug_b"},
+            "dosage_lookup": {"drug", "condition"},
+            "active_prescriptions_for_patient": {"patient_id"},
+            "contraindication_check": {"drug"},
+            "condition_treatment_options": {"condition"},
+        }
+        
+        required_keys = REQUIRED_ENTITIES.get(gen_result.intent, set())
+        missing_keys = required_keys - set(gen_result.parameters.keys())
+        if missing_keys:
+            return QueryResponse(
+                type="unknown_intent",
+                text=f"Missing required entity parameters: {', '.join(sorted(missing_keys))} for intent {gen_result.intent}.",
+                facts=[],
+                intent=gen_result.intent
+            )
             
         # Step 2: Execute dynamically generated Cypher query on Neo4j
         facts = execute_dynamic_cypher(gen_result.cypher_query, gen_result.parameters)

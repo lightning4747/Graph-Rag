@@ -238,4 +238,30 @@ def test_query_pipeline_patient_scoping_enforcement(doctor_auth_header, monkeypa
     assert "Unsafe patient-scoped query: query does not reference patient_id parameter" in res.json()["detail"]
 
 
+def test_query_pipeline_missing_entities_enforcement(doctor_auth_header, monkeypatch):
+    client = TestClient(app)
+    
+    from app.query.cypher_generator import DynamicCypher
+    
+    # Mock generate_cypher to return dosage_lookup intent but missing both "drug" and "condition"
+    monkeypatch.setattr(
+        "app.query.router.generate_cypher",
+        lambda question, patient_id: DynamicCypher(
+            intent="dosage_lookup",
+            cypher_query="MATCH (m:Medication)-[t:CLINICALLY_TREATS]->(c:Condition) RETURN m",
+            parameters={}
+        )
+    )
+    
+    payload = {"question": "Dosage lookup"}
+    res = client.post("/api/v1/query", json=payload, headers=doctor_auth_header)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["type"] == "unknown_intent"
+    assert "Missing required entity parameters" in data["text"]
+    assert "drug" in data["text"]
+    assert "condition" in data["text"]
+
+
+
 
