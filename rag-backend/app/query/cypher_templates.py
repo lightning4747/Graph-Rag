@@ -16,14 +16,15 @@ def execute_dynamic_cypher(query: str, params: dict) -> list[dict]:
     """
     Execute a dynamically generated Cypher query with parameters.
     """
-    if not driver:
-        raise RuntimeError("Neo4j driver is not initialized")
-        
     # Safety gate: reject any query containing write or procedure invocation patterns
     import re
     write_patterns = r"\b(create|merge|set|delete|detach|remove|call)\b"
     if re.search(write_patterns, query, re.IGNORECASE):
         raise ValueError("Unsafe Cypher query rejected: write or procedure execution patterns are disallowed.")
+
+    if not driver:
+        raise RuntimeError("Neo4j driver is not initialized")
+
         
     def read_tx(tx):
         result = tx.run(query, **params)
