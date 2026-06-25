@@ -13,7 +13,9 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const statusFilter = searchParams.get('status_filter') || 'pending_review';
+    const status = searchParams.get('status');
+    const statusFilterParam = searchParams.get('status_filter');
+    const statusFilter = status || statusFilterParam || 'pending_review';
 
     const data = await callBackend(
       `/api/v1/quarantine?status_filter=${encodeURIComponent(statusFilter)}`,
