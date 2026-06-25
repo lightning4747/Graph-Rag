@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { callBackend } from '@/lib/circuit-breaker';
+import { callBackend, CircuitOpenError } from '@/lib/circuit-breaker';
 import { JWT_COOKIE_NAME } from '@/lib/jwt';
 
 export const maxDuration = 180;
@@ -19,6 +19,8 @@ export async function POST(request: Request) {
     return NextResponse.json(data);
   } catch (error: any) {
     console.error('Ingest proxy error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    const status = error.status || 500;
+    const body = error.body || { error: error.message || 'Internal Server Error' };
+    return NextResponse.json(body, { status });
   }
 }

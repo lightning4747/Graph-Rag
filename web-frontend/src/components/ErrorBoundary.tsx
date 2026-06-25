@@ -23,6 +23,12 @@ export default class ErrorBoundary extends Component<Props, State> {
     console.error('Unhandled runtime error caught by ErrorBoundary:', error, errorInfo);
   }
 
+  public componentDidUpdate(prevProps: Props) {
+    if (this.state.hasError && this.props.children !== prevProps.children) {
+      this.setState({ hasError: false });
+    }
+  }
+
   public render() {
     if (this.state.hasError) {
       return (
@@ -59,6 +65,24 @@ export default class ErrorBoundary extends Component<Props, State> {
           <p style={{ fontSize: '14px' }}>
             An unexpected error occurred — please refresh the browser or re-establish session.
           </p>
+          <button
+            id="error-boundary-retry-btn"
+            onClick={() => this.setState({ hasError: false })}
+            style={{
+              marginTop: '16px',
+              padding: '10px 20px',
+              backgroundColor: '#991b1b',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              fontSize: '14px',
+              boxShadow: '0 2px 4px rgba(153, 27, 27, 0.2)',
+            }}
+          >
+            Attempt Recovery
+          </button>
         </div>
       );
     }

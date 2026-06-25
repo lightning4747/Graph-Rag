@@ -79,7 +79,7 @@ export default function ChatResponse({ response }: ChatResponseProps) {
               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
               <line x1="12" y1="17" x2="12.01" y2="17" />
             </svg>
-            <strong>No matching query template for that question.</strong>
+            <strong>This question could not be handled by the current clinical question support.</strong>
           </div>
           <p style={{ fontSize: '13px', marginBottom: '10px', opacity: 0.8 }}>
             This system only answers specific clinical question types. Try rephrasing as one of:

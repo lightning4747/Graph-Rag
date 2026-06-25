@@ -23,12 +23,6 @@ export async function POST(
       token,
       'POST'
     );
-    if (data && data.type === 'circuit_open') {
-      return NextResponse.json(
-        { error: data.text },
-        { status: 503 }
-      );
-    }
     return NextResponse.json(data);
   } catch (error: any) {
     console.error('Quarantine reject proxy error:', error);

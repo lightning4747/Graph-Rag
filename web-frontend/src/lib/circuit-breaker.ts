@@ -53,9 +53,8 @@ const backendRequest = async ({ path, body, method = 'POST', token }: CallBacken
 };
 
 const options = {
-  // 180 s: LLM intent classification + response generation via OpenRouter takes longer.
-  // The spec's original 5 s was written for fast local APIs — this overrides it for the hosted LLM.
-  timeout: 180000,
+  // 175 s (slightly below the 180s Next.js maxDuration limit)
+  timeout: 175000,
   errorThresholdPercentage: 50,
   resetTimeout: 30000,
   rollingCountTimeout: 10000,
@@ -64,16 +63,28 @@ const options = {
 
 const breaker = new CircuitBreaker(backendRequest, options);
 
+export class CircuitOpenError extends Error {
+  status: number;
+  body: any;
+  code: string;
+
+  constructor(message: string) {
+    super(message);
+    this.name = 'CircuitOpenError';
+    this.status = 503;
+    this.code = 'EOPENBREAKER';
+    this.body = {
+      error: message,
+    };
+  }
+}
+
 export async function callBackend(path: string, body?: any, token?: string, method: string = 'POST') {
   try {
     return await breaker.fire({ path, body, method, token });
   } catch (error: any) {
     if (error?.code === 'EOPENBREAKER' || error?.message === 'OpenCircuitError') {
-      return {
-        type: 'circuit_open',
-        text: 'Backend is currently unavailable. Please try again in a moment.',
-        facts: [],
-      };
+      throw new CircuitOpenError('Backend is currently unavailable. Please try again in a moment.');
     }
     throw error;
   }

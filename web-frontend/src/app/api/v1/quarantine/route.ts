@@ -26,9 +26,8 @@ export async function GET(request: Request) {
     return NextResponse.json(data);
   } catch (error: any) {
     console.error('Quarantine GET proxy error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Internal Server Error' },
-      { status: 500 }
-    );
+    const status = error.status || 500;
+    const body = error.body || { error: error.message || 'Internal Server Error' };
+    return NextResponse.json(body, { status });
   }
 }

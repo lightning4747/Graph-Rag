@@ -11,8 +11,10 @@ export default function RawFactsTable({ facts }: RawFactsTableProps) {
     return <div className={styles.emptyText}>No structured facts available.</div>;
   }
 
-  // Get keys from the first object to represent headers
-  const headers = Object.keys(facts[0]);
+  // Get all unique keys across all facts to represent headers
+  const headers = Array.from(
+    new Set(facts.flatMap((fact) => Object.keys(fact)))
+  );
 
   const renderValue = (val: any): string => {
     if (val === null || val === undefined) return '';

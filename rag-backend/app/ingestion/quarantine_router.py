@@ -96,7 +96,7 @@ def approve_quarantine_item(
         # 1. Fetch note_id and current status
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT note_id, status FROM quarantine_extractions WHERE id = %s",
+                "SELECT note_id, status FROM quarantine_extractions WHERE id = %s FOR UPDATE",
                 (id,)
             )
             row = cur.fetchone()
