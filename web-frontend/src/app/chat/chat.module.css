@@ -479,3 +479,71 @@
     color: #64748b;
   }
 }
+
+/* Try an Example Section */
+.exampleSection {
+  margin-top: 20px;
+}
+
+.exampleTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.exampleList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.exampleButton {
+  text-align: left;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: #334155;
+  transition: all 0.15s ease;
+}
+
+.exampleButton:hover {
+  border-color: #3b82f6;
+  background-color: #f8fafc;
+}
+
+.exampleBadge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #3b82f6;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.exampleText {
+  font-size: 13px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .exampleTitle {
+    color: #94a3b8;
+  }
+  .exampleButton {
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+  }
+  .exampleButton:hover {
+    border-color: #38bdf8;
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+  .exampleBadge {
+    color: #38bdf8;
+  }
+}
