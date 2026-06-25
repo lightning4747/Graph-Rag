@@ -28,6 +28,7 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
   const [question, setQuestion] = useState('');
   const [patientId, setPatientId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -36,6 +37,10 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -405,7 +410,7 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
                 id="chat-submit-button"
                 type="submit"
                 className={styles.submitBtn}
-                disabled={isLoading || !question.trim()}
+                disabled={!mounted || isLoading || !question.trim()}
               >
                 <span>Ask Portal</span>
                 <svg
