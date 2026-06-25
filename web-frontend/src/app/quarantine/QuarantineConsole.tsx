@@ -427,7 +427,7 @@ export default function QuarantineConsole({ user, initialItems }: QuarantineCons
                       className={styles.input}
                       style={{ height: '80px', resize: 'vertical' }}
                       disabled={isSubmitting}
-                      required
+                      required={!(field.key === 'rxnorm_code_guess' || field.key === 'icd10_guess')}
                     />
                   ) : field.type === 'select' ? (
                     <select
@@ -436,7 +436,7 @@ export default function QuarantineConsole({ user, initialItems }: QuarantineCons
                       onChange={(e) => handleFieldChange(field.key, e.target.value)}
                       className={styles.input}
                       disabled={isSubmitting}
-                      required
+                      required={!(field.key === 'rxnorm_code_guess' || field.key === 'icd10_guess')}
                     >
                       {field.options?.map((opt) => (
                         <option key={opt} value={opt}>
@@ -452,7 +452,7 @@ export default function QuarantineConsole({ user, initialItems }: QuarantineCons
                       onChange={(e) => handleFieldChange(field.key, e.target.value)}
                       className={styles.input}
                       disabled={isSubmitting}
-                      required
+                      required={!(field.key === 'rxnorm_code_guess' || field.key === 'icd10_guess')}
                     />
                   )}
                 </div>
