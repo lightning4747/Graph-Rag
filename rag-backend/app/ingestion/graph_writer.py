@@ -27,8 +27,8 @@ def write_encounter_and_patient(
     if not driver:
         raise RuntimeError("Neo4j driver is not initialized")
     
-    with driver.session() as session:
-        session.run(
+    def write_tx(tx):
+        tx.run(
             """
             MERGE (p:Patient {patient_id: $patient_id})
             MERGE (e:Encounter {encounter_id: $encounter_id})
@@ -42,6 +42,10 @@ def write_encounter_and_patient(
             encounter_type=encounter_type,
         )
 
+    with driver.session() as session:
+        session.execute_write(write_tx)
+
+
 def write_prescription(
     extraction: ExtractedPrescription,
     encounter_id: str,
@@ -53,8 +57,8 @@ def write_prescription(
     if not driver:
         raise RuntimeError("Neo4j driver is not initialized")
         
-    with driver.session() as session:
-        session.run(
+    def write_tx(tx):
+        tx.run(
             """
             MATCH (m:Medication {rxnorm_code: $rxnorm_code})
             MATCH (e:Encounter {encounter_id: $encounter_id})
@@ -81,6 +85,10 @@ def write_prescription(
             verified_by=verified_by,
         )
 
+    with driver.session() as session:
+        session.execute_write(write_tx)
+
+
 def write_condition_link(
     extraction: ExtractedCondition,
     encounter_id: str,
@@ -92,8 +100,8 @@ def write_condition_link(
     if not driver:
         raise RuntimeError("Neo4j driver is not initialized")
         
-    with driver.session() as session:
-        session.run(
+    def write_tx(tx):
+        tx.run(
             """
             MATCH (c:Condition {condition_id: $icd10_code})
             MATCH (e:Encounter {encounter_id: $encounter_id})
@@ -118,6 +126,10 @@ def write_condition_link(
             verified_by=verified_by,
         )
 
+    with driver.session() as session:
+        session.execute_write(write_tx)
+
+
 def write_observation(
     extraction: ExtractedObservation,
     encounter_id: str,
@@ -129,8 +141,8 @@ def write_observation(
     if not driver:
         raise RuntimeError("Neo4j driver is not initialized")
         
-    with driver.session() as session:
-        session.run(
+    def write_tx(tx):
+        tx.run(
             """
             MATCH (e:Encounter {encounter_id: $encounter_id})
             CREATE (obs:Observation {
@@ -152,3 +164,7 @@ def write_observation(
             extraction_method=extraction_method,
             verified_by=verified_by,
         )
+
+    with driver.session() as session:
+        session.execute_write(write_tx)
+

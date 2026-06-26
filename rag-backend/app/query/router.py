@@ -3,8 +3,8 @@ from pydantic import BaseModel
 from typing import Literal, List, Optional, Dict, Any
 
 from app.dependencies import get_current_user
-from app.query.intent_classifier import classify_intent
-from app.query.cypher_templates import validate_entities, execute_template
+from app.query.cypher_generator import generate_cypher
+from app.query.cypher_templates import execute_dynamic_cypher
 from app.query.number_verifier import safe_respond
 
 router = APIRouter()
@@ -38,37 +38,82 @@ def execute_query(
     question_text = request.question.strip()
     
     try:
-        # Step 1: Classify Query Intent
-        intent = classify_intent(question_text)
+        # Step 1: Generate dynamic Cypher query and parameters
+        gen_result = generate_cypher(question_text, request.patient_id)
         
         # Guard: Check for unknown intent
-        if intent.intent == "unknown":
+        if gen_result.intent == "unknown" or not gen_result.cypher_query:
             return QueryResponse(
                 type="unknown_intent",
                 text="No matching query available for this question.",
                 facts=[],
                 intent="unknown"
             )
-            
-        # Merge patient_id from request body if intent requires it and it was provided
-        if intent.intent == "active_prescriptions_for_patient" and request.patient_id:
-            intent.entities["patient_id"] = request.patient_id.strip()
-            
-        # Step 2: Validate that all required entity keys are present
-        validation_err = validate_entities(intent)
-        if validation_err:
+
+        # Enforce server-side read-only allowlist and safety patterns
+        ALLOWED_INTENTS = {
+            "drug_interaction_check",
+            "dosage_lookup",
+            "active_prescriptions_for_patient",
+            "contraindication_check",
+            "condition_treatment_options"
+        }
+        if gen_result.intent not in ALLOWED_INTENTS:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unauthorized query intent detected"
+            )
+
+        import re
+        write_patterns = r"\b(create|merge|set|delete|detach|remove|call)\b"
+        if re.search(write_patterns, gen_result.cypher_query, re.IGNORECASE):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unsafe query pattern detected. Writing or calling procedures is not allowed."
+            )
+
+        # Enforce patient scoping validation for patient-specific intents
+        if gen_result.intent == "active_prescriptions_for_patient":
+            if not request.patient_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Patient-scoped query requires a patient ID"
+                )
+            if gen_result.parameters.get("patient_id") != request.patient_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Unmatched patient ID in query parameters"
+                )
+            if "$patient_id" not in gen_result.cypher_query:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Unsafe patient-scoped query: query does not reference patient_id parameter"
+                )
+
+        # Enforce parameter requirements for intents (REQUIRED_ENTITIES)
+        REQUIRED_ENTITIES = {
+            "drug_interaction_check": {"drug_a", "drug_b"},
+            "dosage_lookup": {"drug", "condition"},
+            "active_prescriptions_for_patient": {"patient_id"},
+            "contraindication_check": {"drug"},
+            "condition_treatment_options": {"condition"},
+        }
+        
+        required_keys = REQUIRED_ENTITIES.get(gen_result.intent, set())
+        missing_keys = required_keys - set(gen_result.parameters.keys())
+        if missing_keys:
             return QueryResponse(
                 type="unknown_intent",
-                text=validation_err,
+                text=f"Missing required entity parameters: {', '.join(sorted(missing_keys))} for intent {gen_result.intent}.",
                 facts=[],
-                intent=intent.intent
+                intent=gen_result.intent
             )
             
-        # Step 3: Execute Parameterized Cypher Template
-        facts = execute_template(intent)
+        # Step 2: Execute dynamically generated Cypher query on Neo4j
+        facts = execute_dynamic_cypher(gen_result.cypher_query, gen_result.parameters)
         
-        # Step 4 & 5: Generate and verify natural language summary
-        result = safe_respond(facts, intent.intent)
+        # Step 3 & 4: Generate and verify natural language summary
+        result = safe_respond(facts, gen_result.intent)
         
         return QueryResponse(
             type=result["type"],
@@ -76,6 +121,8 @@ def execute_query(
             facts=result["facts"],
             intent=result["intent"]
         )
+    except HTTPException as he:
+        raise he
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

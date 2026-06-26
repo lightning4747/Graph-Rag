@@ -1,0 +1,153 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 16px;
+  animation: fade-in 0.25s ease-out;
+}
+
+.intentBadge {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .intentBadge {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #cbd5e1;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+.bubble {
+  max-width: 85%;
+  padding: 16px 20px;
+  border-radius: 16px;
+  font-size: 15px;
+  line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.generated {
+  align-self: flex-start;
+  background-color: #ffffff;
+  color: #1e293b;
+  border: 1px solid #e2e8f0;
+  border-top-left-radius: 4px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .generated {
+    background-color: #1e293b;
+    color: #f1f5f9;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+}
+
+.fallbackCard {
+  align-self: flex-start;
+  background-color: #fffbeb;
+  color: #78350f;
+  border: 1px solid #fde68a;
+  border-left: 5px solid #f59e0b;
+  border-radius: 12px;
+  width: 90%;
+  padding: 18px 22px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .fallbackCard {
+    background-color: rgba(245, 158, 11, 0.05);
+    color: #fef3c7;
+    border: 1px solid rgba(245, 158, 11, 0.15);
+    border-left: 5px solid #f59e0b;
+  }
+}
+
+.disclaimer {
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.unknown {
+  align-self: flex-start;
+  background-color: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-style: italic;
+  padding: 14px 18px;
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .unknown {
+    background-color: rgba(255, 255, 255, 0.02);
+    color: #94a3b8;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+}
+
+.errorCard {
+  align-self: flex-start;
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  border-left: 5px solid #ef4444;
+  border-radius: 12px;
+  padding: 18px 22px;
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .errorCard {
+    background-color: rgba(239, 68, 68, 0.05);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.15);
+    border-left: 5px solid #ef4444;
+  }
+}
+
+.errorTitle {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.errorText {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

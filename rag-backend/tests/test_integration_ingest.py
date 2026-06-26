@@ -147,9 +147,10 @@ def test_ingest_integration(auth_header):
                     encounter_id=payload["note_id"]
                 ).data()
                 assert len(rx_res) >= 1, "Prescription node or link to Medication missing"
-                assert rx_res[0]["m"]["rxnorm_code"] == "RXN_855332", "Linked medication rxnorm code mismatch"
-                assert rx_res[0]["rx"]["dose_amount"] == "500mg"
-                assert "BID" in rx_res[0]["rx"]["frequency"] or "twice daily" in rx_res[0]["rx"]["frequency"]
+                metformin_rx = [r for r in rx_res if r["m"]["rxnorm_code"] == "RXN_855332"]
+                assert len(metformin_rx) >= 1, "Metformin prescription node or link to Medication missing"
+                assert metformin_rx[0]["rx"]["dose_amount"] == "500mg"
+                assert "BID" in metformin_rx[0]["rx"]["frequency"] or "twice daily" in metformin_rx[0]["rx"]["frequency"]
                 
                 # 3. Verify Condition links (ICD10_E11 and ICD10_I10)
                 cond_res = session.run(

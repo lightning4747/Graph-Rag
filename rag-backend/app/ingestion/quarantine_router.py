@@ -21,6 +21,9 @@ dsn = os.environ.get("AUTH_DB_DSN")
 
 @router.get("")
 def get_quarantined_items(
+    # spec/plan.md §Phase 6 calls this ?status=pending_review
+    # Legacy param ?status_filter= also accepted for backwards compatibility
+    status: Optional[str] = None,
     status_filter: Optional[str] = "pending_review",
     current_user: dict = Depends(get_current_user)
 ):
@@ -29,9 +32,12 @@ def get_quarantined_items(
     """
     if current_user.get("role") not in ("reviewer", "admin"):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail="Role is not authorized to access quarantine review console"
         )
+    
+    # Resolve effective filter: 'status' param (spec) takes precedence over legacy 'status_filter'
+    effective_status = status or status_filter or "pending_review"
         
     if not dsn:
         raise RuntimeError("AUTH_DB_DSN environment variable is not set")
@@ -46,7 +52,7 @@ def get_quarantined_items(
                 WHERE status = %s
                 ORDER BY created_at DESC
                 """,
-                (status_filter,)
+                (effective_status,)
             )
             rows = cur.fetchall()
             results = []
@@ -78,7 +84,7 @@ def approve_quarantine_item(
     """
     if current_user.get("role") not in ("reviewer", "admin"):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail="Role is not authorized to approve quarantined items"
         )
         
@@ -90,17 +96,17 @@ def approve_quarantine_item(
         # 1. Fetch note_id and current status
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT note_id, status FROM quarantine_extractions WHERE id = %s",
+                "SELECT note_id, status FROM quarantine_extractions WHERE id = %s FOR UPDATE",
                 (id,)
             )
             row = cur.fetchone()
             if not row:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quarantine record not found")
+                raise HTTPException(status_code=404, detail="Quarantine record not found")
             note_id, current_status = row
             
             if current_status != "pending_review":
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
+                    status_code=400,
                     detail=f"Quarantine record is already {current_status} and cannot be approved"
                 )
                 
@@ -181,7 +187,7 @@ def reject_quarantine_item(
     """
     if current_user.get("role") not in ("reviewer", "admin"):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail="Role is not authorized to reject quarantined items"
         )
         
@@ -197,12 +203,12 @@ def reject_quarantine_item(
             )
             row = cur.fetchone()
             if not row:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quarantine record not found")
+                raise HTTPException(status_code=404, detail="Quarantine record not found")
             current_status = row[0]
             
             if current_status != "pending_review":
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
+                    status_code=400,
                     detail=f"Quarantine record is already {current_status} and cannot be rejected"
                 )
                 
