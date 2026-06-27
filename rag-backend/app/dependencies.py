@@ -2,11 +2,11 @@ import os
 import jwt
 from fastapi import Header, HTTPException, status
 
-JWT_SHARED_SECRET = os.environ.get("JWT_SHARED_SECRET")
-if not JWT_SHARED_SECRET:
+def get_current_user(authorization: str = Header(...)):
+  jwt_secret = os.environ.get("JWT_SHARED_SECRET")
+  if not jwt_secret:
     raise RuntimeError("JWT_SHARED_SECRET environment variable is missing")
 
-def get_current_user(authorization: str = Header(...)):
   if not authorization.startswith("Bearer "):
     raise HTTPException(
       status_code=status.HTTP_401_UNAUTHORIZED,
@@ -16,7 +16,7 @@ def get_current_user(authorization: str = Header(...)):
   token = authorization.split(" ")[1]
   
   try:
-    payload = jwt.decode(token, JWT_SHARED_SECRET, algorithms=["HS256"])
+    payload = jwt.decode(token, jwt_secret, algorithms=["HS256"])
     user_id = payload.get("user_id")
     role = payload.get("role")
     

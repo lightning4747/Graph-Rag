@@ -5,7 +5,7 @@ from openai import OpenAI
 # Initialize OpenRouter-compatible client for plain generation
 _openrouter = OpenAI(
     base_url=os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api"),
-    api_key=os.environ.get("OPENROUTER_API_KEY", "placeholder_key"),
+    api_key=os.environ.get("OPENROUTER_API_KEY") or "placeholder_key",
 )
 _openai = _openrouter
 
