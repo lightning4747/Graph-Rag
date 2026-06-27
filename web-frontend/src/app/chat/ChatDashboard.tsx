@@ -33,6 +33,75 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Autocomplete suggestions config
+  const PATIENTS_POOL = [
+    'CASE_9942A',
+    'PATIENT_QUARANTINE_TEST',
+    'CASE_interaction_test_patient',
+    'CASE_contraindication_test_patient',
+    'CASE_dosage_test_patient'
+  ];
+
+  const [filteredPatients, setFilteredPatients] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const suggestionsRef = useRef<HTMLUListElement>(null);
+  const patientInputWrapperRef = useRef<HTMLDivElement>(null);
+
+  // Debounced search logic for patient autocomplete (200ms debounce, threshold >= 2)
+  useEffect(() => {
+    const trimmed = patientId.trim();
+    if (trimmed.length < 2) {
+      setFilteredPatients([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const handler = setTimeout(() => {
+      const matches = PATIENTS_POOL.filter(p =>
+        p.toLowerCase().includes(trimmed.toLowerCase())
+      );
+      setFilteredPatients(matches);
+      setShowSuggestions(matches.length > 0);
+      setHighlightedIndex(-1);
+    }, 200);
+
+    return () => clearTimeout(handler);
+  }, [patientId]);
+
+  // Click outside listener to close autocomplete dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (patientInputWrapperRef.current && !patientInputWrapperRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Keyboard navigation inside patient suggestion list
+  const handlePatientInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || filteredPatients.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev + 1) % filteredPatients.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev - 1 + filteredPatients.length) % filteredPatients.length);
+    } else if (e.key === 'Enter') {
+      if (highlightedIndex >= 0 && highlightedIndex < filteredPatients.length) {
+        e.preventDefault();
+        setPatientId(filteredPatients[highlightedIndex]);
+        setShowSuggestions(false);
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setShowSuggestions(false);
+    }
+  };
+
   // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -371,7 +440,7 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
         <footer className={styles.inputArea}>
           <form onSubmit={handleAsk}>
             <div className={styles.optionalRow}>
-              <div className={styles.patientInputWrapper}>
+              <div className={styles.patientInputWrapper} ref={patientInputWrapperRef}>
                 <label htmlFor="chat-patient-id-input" className={styles.patientLabel}>
                   Patient ID (Optional)
                 </label>
@@ -380,10 +449,52 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
                   type="text"
                   value={patientId}
                   onChange={(e) => setPatientId(e.target.value)}
+                  onKeyDown={handlePatientInputKeyDown}
+                  onFocus={() => {
+                    if (patientId.trim().length >= 2 && filteredPatients.length > 0) {
+                      setShowSuggestions(true);
+                    }
+                  }}
                   placeholder="e.g. CASE_9942A"
                   className={styles.patientInput}
                   disabled={isLoading}
+                  role="combobox"
+                  aria-expanded={showSuggestions}
+                  aria-autocomplete="list"
+                  aria-controls="patient-suggestions-list"
+                  aria-haspopup="listbox"
+                  aria-activedescendant={
+                    highlightedIndex >= 0 ? `suggestion-item-${highlightedIndex}` : undefined
+                  }
                 />
+
+                {showSuggestions && filteredPatients.length > 0 && (
+                  <ul
+                    id="patient-suggestions-list"
+                    ref={suggestionsRef}
+                    className={styles.suggestionsList}
+                    role="listbox"
+                    aria-label="Patient suggestions"
+                  >
+                    {filteredPatients.map((patient, index) => (
+                      <li
+                        key={patient}
+                        id={`suggestion-item-${index}`}
+                        role="option"
+                        aria-selected={index === highlightedIndex}
+                        onClick={() => {
+                          setPatientId(patient);
+                          setShowSuggestions(false);
+                        }}
+                        className={`${styles.suggestionItem} ${
+                          index === highlightedIndex ? styles.suggestionItemHovered : ''
+                        }`}
+                      >
+                        {patient}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
 

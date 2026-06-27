@@ -1,76 +1,50 @@
 .container {
   margin-top: 10px;
-  border-left: 4px solid #f59e0b; /* distinct amber left border */
+  border-left: 3px solid hsl(var(--warning));
   padding-left: 14px;
-  background-color: rgba(245, 158, 11, 0.03);
+  background-color: hsla(var(--warning), 0.05);
   border-radius: 0 8px 8px 0;
   overflow-x: auto;
-}
-
-@media (prefers-color-scheme: dark) {
-  .container {
-    background-color: rgba(245, 158, 11, 0.02);
-  }
 }
 
 .tableWrapper {
   width: 100%;
   border-collapse: collapse;
   margin: 8px 0;
-  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: inherit;
   font-size: 13px;
   text-align: left;
 }
 
 .tableHeader {
-  background-color: rgba(245, 158, 11, 0.1);
-  color: #b45309;
+  background-color: hsla(var(--warning), 0.15);
+  color: hsl(var(--warning));
   font-weight: 700;
   padding: 8px 12px;
-  border-bottom: 2px solid rgba(245, 158, 11, 0.2);
-}
-
-@media (prefers-color-scheme: dark) {
-  .tableHeader {
-    background-color: rgba(245, 158, 11, 0.15);
-    color: #f59e0b;
-    border-bottom: 2px solid rgba(245, 158, 11, 0.3);
-  }
+  border-bottom: 2px solid hsla(var(--warning), 0.25);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .tableRow {
-  border-bottom: 1px solid rgba(245, 158, 11, 0.1);
-  transition: background-color 0.2s ease;
+  border-bottom: 1px solid hsl(var(--border-color));
+  transition: background-color var(--transition-fast) ease;
 }
 
 .tableRow:hover {
-  background-color: rgba(245, 158, 11, 0.05);
-}
-
-@media (prefers-color-scheme: dark) {
-  .tableRow {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  }
-  .tableRow:hover {
-    background-color: rgba(255, 255, 255, 0.02);
-  }
+  background-color: hsla(0, 0%, 100%, 0.02);
 }
 
 .tableCell {
   padding: 8px 12px;
-  color: inherit;
+  color: hsl(var(--text-main));
   word-break: break-all;
 }
 
 .emptyText {
-  color: #64748b;
+  color: hsl(var(--text-subtle));
   font-style: italic;
   padding: 8px 0;
   font-size: 13px;
-}
-
-@media (prefers-color-scheme: dark) {
-  .emptyText {
-    color: #94a3b8;
-  }
 }

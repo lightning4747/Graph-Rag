@@ -4,7 +4,7 @@
   gap: 8px;
   width: 100%;
   margin-bottom: 16px;
-  animation: fade-in 0.25s ease-out;
+  animation: fade-in var(--transition-fast) ease-out;
 }
 
 .intentBadge {
@@ -12,20 +12,12 @@
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
   padding: 4px 8px;
-  background-color: #f1f5f9;
-  color: #475569;
+  background-color: hsla(0, 0%, 100%, 0.08);
+  color: hsl(var(--text-main));
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
-}
-
-@media (prefers-color-scheme: dark) {
-  .intentBadge {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #cbd5e1;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
+  border: 1px solid hsl(var(--border-color));
 }
 
 .bubble {
@@ -34,43 +26,28 @@
   border-radius: 16px;
   font-size: 15px;
   line-height: 1.5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .generated {
   align-self: flex-start;
-  background-color: #ffffff;
-  color: #1e293b;
-  border: 1px solid #e2e8f0;
+  background-color: hsl(var(--bg-card) / 0.95);
+  backdrop-filter: blur(8px);
+  color: hsl(var(--text-main));
+  border: 1px solid hsl(var(--border-color));
   border-top-left-radius: 4px;
-}
-
-@media (prefers-color-scheme: dark) {
-  .generated {
-    background-color: #1e293b;
-    color: #f1f5f9;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-  }
 }
 
 .fallbackCard {
   align-self: flex-start;
-  background-color: #fffbeb;
-  color: #78350f;
-  border: 1px solid #fde68a;
-  border-left: 5px solid #f59e0b;
+  background-color: hsla(var(--warning), 0.1);
+  color: hsl(var(--text-main));
+  border: 1px solid hsla(var(--warning), 0.25);
+  border-left: 5px solid hsl(var(--warning));
   border-radius: 12px;
   width: 90%;
   padding: 18px 22px;
-}
-
-@media (prefers-color-scheme: dark) {
-  .fallbackCard {
-    background-color: rgba(245, 158, 11, 0.05);
-    color: #fef3c7;
-    border: 1px solid rgba(245, 158, 11, 0.15);
-    border-left: 5px solid #f59e0b;
-  }
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .disclaimer {
@@ -84,9 +61,10 @@
 
 .unknown {
   align-self: flex-start;
-  background-color: #f8fafc;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
+  background-color: hsl(var(--bg-card) / 0.95);
+  backdrop-filter: blur(8px);
+  color: hsl(var(--text-muted));
+  border: 1px solid hsl(var(--border-color));
   border-radius: 12px;
   font-style: italic;
   padding: 14px 18px;
@@ -95,37 +73,22 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
-}
-
-@media (prefers-color-scheme: dark) {
-  .unknown {
-    background-color: rgba(255, 255, 255, 0.02);
-    color: #94a3b8;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-  }
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .errorCard {
   align-self: flex-start;
-  background-color: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fca5a5;
-  border-left: 5px solid #ef4444;
+  background-color: hsla(var(--error), 0.1);
+  color: hsl(var(--text-main));
+  border: 1px solid hsla(var(--error), 0.25);
+  border-left: 5px solid hsl(var(--error));
   border-radius: 12px;
   padding: 18px 22px;
   width: 80%;
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-
-@media (prefers-color-scheme: dark) {
-  .errorCard {
-    background-color: rgba(239, 68, 68, 0.05);
-    color: #fca5a5;
-    border: 1px solid rgba(239, 68, 68, 0.15);
-    border-left: 5px solid #ef4444;
-  }
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .errorTitle {
