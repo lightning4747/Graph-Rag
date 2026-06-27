@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 from app.dependencies import get_current_user
-from app.ingestion.extractor import extract_structured, ExtractionResult
+from app.ingestion.extractor import extract_structured
 from app.ingestion.grounding_verifier import verify_entity
 from app.ingestion.graph_writer import (
     write_encounter_and_patient,

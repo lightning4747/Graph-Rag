@@ -2,7 +2,7 @@ import os
 import json
 import psycopg2
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 
 from app.dependencies import get_current_user
 from app.ingestion.extractor import (

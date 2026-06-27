@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.ingestion.router import router as ingestion_router
+from app.query.router import router as query_router
+from app.ingestion.quarantine_router import router as quarantine_router
 
 app = FastAPI(
     title="Clinical GraphRAG Backend",
@@ -15,11 +18,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Ingestion router imports
-from app.ingestion.router import router as ingestion_router
-from app.query.router import router as query_router
-from app.ingestion.quarantine_router import router as quarantine_router
 
 app.include_router(ingestion_router, prefix="/api/v1/ingest", tags=["Ingestion"])
 app.include_router(query_router, prefix="/api/v1/query", tags=["Query"])

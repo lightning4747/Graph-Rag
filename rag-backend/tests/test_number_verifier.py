@@ -1,4 +1,3 @@
-import pytest
 from app.query.number_verifier import verify_response_numbers, safe_respond
 
 # Test cases for verify_response_numbers

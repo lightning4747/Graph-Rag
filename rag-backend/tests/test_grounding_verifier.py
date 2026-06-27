@@ -1,4 +1,3 @@
-import pytest
 from app.ingestion.extractor import (
     ExtractedPrescription,
     ExtractedCondition,
