@@ -2,7 +2,7 @@ import os
 import jwt
 import pytest
 from fastapi.testclient import TestClient
-from tests.test_integration_ingest import cleanup_test_data
+from tests.test_integration_ingest import cleanup_test_data, read_case_9942a_note_text, require_integration_env
 
 from app.main import app
 
@@ -19,28 +19,11 @@ def reviewer_auth_header():
     return {"Authorization": f"Bearer {token}"}
 
 def test_query_pipeline_integration(doctor_auth_header, reviewer_auth_header):
+    require_integration_env("OPENROUTER_API_KEY", "NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "AUTH_DB_DSN")
     client = TestClient(app)
     
     # 1. Ingest CASE_9942A data first to ensure graph records exist
-    note_path = "seed_data/raw_patient_notes.txt"
-    with open(note_path, "r") as f:
-        content = f.read()
-        
-    lines = content.splitlines()
-    note_lines = []
-    capture = False
-    for line in lines:
-        if "PATIENT LOG: CASE_9942A" in line:
-            capture = True
-            continue
-        if capture:
-            if line.startswith("===") and not note_lines:
-                continue
-            if line.startswith("==="):
-                break
-            note_lines.append(line)
-            
-    note_text = "\n".join(note_lines).strip()
+    note_text = read_case_9942a_note_text()
     
     ingest_payload = {
         "note_text": note_text,
@@ -106,6 +89,7 @@ def test_query_pipeline_integration(doctor_auth_header, reviewer_auth_header):
         cleanup_test_data(ingest_payload["patient_id"], ingest_payload["note_id"])
 
 def test_query_pipeline_hallucination_fallback(doctor_auth_header, monkeypatch):
+    require_integration_env("OPENROUTER_API_KEY")
     client = TestClient(app)
     
     # Mock generate_response to return a response containing a hallucinated dosage amount (2500mg)
@@ -261,7 +245,5 @@ def test_query_pipeline_missing_entities_enforcement(doctor_auth_header, monkeyp
     assert "Missing required entity parameters" in data["text"]
     assert "drug" in data["text"]
     assert "condition" in data["text"]
-
-
 
 

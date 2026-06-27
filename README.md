@@ -34,7 +34,7 @@ The backend implements a multi-stage verification process to minimize hallucinat
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/lightning4747/Graph-Rag
    cd clinical-rag
    ```
 
