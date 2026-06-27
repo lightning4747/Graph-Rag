@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import jwt
 import pytest
 from fastapi.testclient import TestClient
@@ -9,6 +10,34 @@ from app.main import app
 
 # Ensure environment has secret
 JWT_SHARED_SECRET = os.environ.get("JWT_SHARED_SECRET") or "UCTYmi8VSBPQVJyxziCyi8noegzpMgdC+c4jwvJYvsw="
+RAW_PATIENT_NOTE_PATH = Path(__file__).resolve().parent.parent / "seed_data" / "raw_patient_notes.txt"
+
+
+def require_integration_env(*env_vars):
+    missing = [name for name in env_vars if not os.environ.get(name)]
+    if missing:
+        pytest.skip(f"Missing required integration environment variables: {', '.join(missing)}")
+
+
+def read_case_9942a_note_text():
+    with RAW_PATIENT_NOTE_PATH.open("r") as f:
+        content = f.read()
+
+    lines = content.splitlines()
+    note_lines = []
+    capture = False
+    for line in lines:
+        if "PATIENT LOG: CASE_9942A" in line:
+            capture = True
+            continue
+        if capture:
+            if line.startswith("===") and not note_lines:
+                continue
+            if line.startswith("==="):
+                break
+            note_lines.append(line)
+
+    return "\n".join(note_lines).strip()
 
 @pytest.fixture
 def auth_header():
@@ -61,29 +90,11 @@ def cleanup_test_data(patient_id, note_id):
             conn.close()
 
 def test_ingest_integration(auth_header):
+    require_integration_env("OPENROUTER_API_KEY", "NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "AUTH_DB_DSN")
     client = TestClient(app)
     
     # Read the clean patient note
-    note_path = "seed_data/raw_patient_notes.txt"
-    with open(note_path, "r") as f:
-        content = f.read()
-        
-    # Extract the note text for CASE_9942A
-    lines = content.splitlines()
-    note_lines = []
-    capture = False
-    for line in lines:
-        if "PATIENT LOG: CASE_9942A" in line:
-            capture = True
-            continue
-        if capture:
-            if line.startswith("===") and not note_lines:
-                continue
-            if line.startswith("==="):
-                break
-            note_lines.append(line)
-            
-    note_text = "\n".join(note_lines).strip()
+    note_text = read_case_9942a_note_text()
     
     # Build payload
     payload = {

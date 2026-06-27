@@ -9,7 +9,7 @@ from neo4j import GraphDatabase
 
 from app.main import app
 from app.ingestion.graph_writer import write_encounter_and_patient
-from tests.test_integration_ingest import cleanup_test_data
+from tests.test_integration_ingest import cleanup_test_data, require_integration_env
 
 JWT_SHARED_SECRET = os.environ.get("JWT_SHARED_SECRET") or "UCTYmi8VSBPQVJyxziCyi8noegzpMgdC+c4jwvJYvsw="
 AUTH_DB_DSN = os.environ.get("AUTH_DB_DSN")
@@ -97,6 +97,7 @@ def cleanup_postgres_test_data():
         conn.close()
 
 def test_quarantine_flow_integration(doctor_auth_header, reviewer_auth_header):
+    require_integration_env("NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "AUTH_DB_DSN")
     # Prepare databases
     cleanup_postgres_test_data()
     cleanup_test_data(TEST_PATIENT_ID, TEST_NOTE_ID)
