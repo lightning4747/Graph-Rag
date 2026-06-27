@@ -8,7 +8,7 @@ import psycopg2
 from app.main import app
 
 # Ensure environment has secret
-JWT_SHARED_SECRET = os.environ.get("JWT_SHARED_SECRET", "UCTYmi8VSBPQVJyxziCyi8noegzpMgdC+c4jwvJYvsw=")
+JWT_SHARED_SECRET = os.environ.get("JWT_SHARED_SECRET") or "UCTYmi8VSBPQVJyxziCyi8noegzpMgdC+c4jwvJYvsw="
 
 @pytest.fixture
 def auth_header():

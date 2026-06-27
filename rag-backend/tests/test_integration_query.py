@@ -6,7 +6,7 @@ from tests.test_integration_ingest import cleanup_test_data
 
 from app.main import app
 
-JWT_SHARED_SECRET = os.environ.get("JWT_SHARED_SECRET", "UCTYmi8VSBPQVJyxziCyi8noegzpMgdC+c4jwvJYvsw=")
+JWT_SHARED_SECRET = os.environ.get("JWT_SHARED_SECRET") or "UCTYmi8VSBPQVJyxziCyi8noegzpMgdC+c4jwvJYvsw="
 
 @pytest.fixture
 def doctor_auth_header():

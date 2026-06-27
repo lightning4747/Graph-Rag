@@ -11,7 +11,7 @@ from app.main import app
 from app.ingestion.graph_writer import write_encounter_and_patient
 from tests.test_integration_ingest import cleanup_test_data
 
-JWT_SHARED_SECRET = os.environ.get("JWT_SHARED_SECRET", "UCTYmi8VSBPQVJyxziCyi8noegzpMgdC+c4jwvJYvsw=")
+JWT_SHARED_SECRET = os.environ.get("JWT_SHARED_SECRET") or "UCTYmi8VSBPQVJyxziCyi8noegzpMgdC+c4jwvJYvsw="
 AUTH_DB_DSN = os.environ.get("AUTH_DB_DSN")
 
 # Generate test UUIDs
