@@ -33,5 +33,7 @@ export const config = {
     '/',
     '/chat/:path*',
     '/quarantine/:path*',
+    '/ingest/:path*',
+    '/patients/:path*',
   ],
 };

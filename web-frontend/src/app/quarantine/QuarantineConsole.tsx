@@ -178,32 +178,7 @@ export default function QuarantineConsole({ user, initialItems }: QuarantineCons
       <aside className={styles.sidebar} aria-label="Session Navigation">
         <div className={styles.sidebarTop}>
           <div className={styles.logoArea}>
-            <svg
-              className={styles.logoIcon}
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
-              <line x1="12" y1="9" x2="12" y2="13" />
-              <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
             <span className={styles.logoText}>Quarantine Panel</span>
-          </div>
-
-          <div className={styles.sessionCard}>
-            <span className={styles.sessionTitle}>Authorized Session</span>
-            <div className={styles.sessionDetail}>
-              <strong>ID:</strong> {user.user_id}
-            </div>
-            <span className={`${styles.badge} ${styles.badgeReviewer}`}>
-              {user.role}
-            </span>
           </div>
 
           <nav className={styles.navLinks} aria-label="Dashboard Navigation">
@@ -221,6 +196,41 @@ export default function QuarantineConsole({ user, initialItems }: QuarantineCons
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
               <span>Clinical Chat</span>
+            </Link>
+
+            <Link href="/ingest" className={styles.link}>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              <span>Ingestion Console</span>
+            </Link>
+
+            <Link href="/patients" className={styles.link}>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              <span>Patient Directory</span>
             </Link>
 
             <Link href="/quarantine" className={`${styles.link} ${styles.linkActive}`}>

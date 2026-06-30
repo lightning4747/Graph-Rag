@@ -1,15 +1,15 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { JWT_COOKIE_NAME, decodeJwt } from '@/lib/jwt';
-import ChatDashboard from './ChatDashboard';
+import IngestConsole from './IngestConsole';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Clinical Chat | Clinical GraphRAG',
-  description: 'Interactive clinical Regimen Query Tool with automatic numeric safety filters.',
+  title: 'Ingestion Console | Clinical GraphRAG',
+  description: 'Secure clinical note parser and verification pipeline.',
 };
 
-export default async function ChatPage() {
+export default async function IngestPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get(JWT_COOKIE_NAME)?.value;
 
@@ -24,6 +24,5 @@ export default async function ChatPage() {
     redirect('/login');
   }
 
-  return <ChatDashboard user={user} />;
+  return <IngestConsole user={user} />;
 }
-

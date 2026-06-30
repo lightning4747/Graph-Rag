@@ -26,8 +26,9 @@ def generate_response(facts: list[dict], intent: str) -> str:
     )
     
     response = _openai.chat.completions.create(
-        model="openrouter/owl-alpha",
+        model="meta-llama/llama-3.3-70b-instruct",
         temperature=0,
+        max_tokens=1000,
         messages=[{
             "role": "user",
             "content": prompt,

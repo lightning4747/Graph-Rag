@@ -48,6 +48,8 @@ Constraints & rules:
 1. Make parameter matching case-insensitive using toLower() (e.g., toLower(m.generic_name) CONTAINS toLower($drug) or toLower($drug) CONTAINS toLower(m.generic_name)).
 2. Return properties with aliases. Make sure to bind relationships to variables (e.g. `-[t:CLINICALLY_TREATS]->`, `-[i:INTERACTS_WITH]-`) when returning their properties (e.g. `t.base_dosage AS base_dosage`, `i.severity AS severity`).
 3. If the query does not map to any logical schema query, set intent='unknown', cypher_query='', and parameters={}.
+4. Prescription status in the database is capitalized (e.g., 'Active'). Always query status using a case-insensitive check like toLower(pr.status) = 'active'.
+5. Never hardcode drug names, condition names, or patient IDs inside the Cypher query. Always use parameters (e.g., $drug, $condition, $patient_id) and ensure they are populated in the parameters dictionary. If the query checks a condition or drug, the corresponding parameter must be returned.
 """
 
 def generate_cypher(question: str, patient_id: str | None = None) -> DynamicCypher:
@@ -63,15 +65,17 @@ def generate_cypher(question: str, patient_id: str | None = None) -> DynamicCyph
 
     try:
         result = _client.chat.completions.create(
-            model="openrouter/owl-alpha",
+            model="meta-llama/llama-3.3-70b-instruct",
             response_model=DynamicCypher,
             temperature=0,
+            max_tokens=1000,
             messages=[{
                 "role": "user",
                 "content": prompt,
             }],
         )
-    except Exception:
+    except Exception as e:
+        print(f"LLM cypher generation failed: {e}")
         return DynamicCypher(intent="unknown", cypher_query="", parameters={})
 
     ALLOWED_INTENTS = {
@@ -81,6 +85,12 @@ def generate_cypher(question: str, patient_id: str | None = None) -> DynamicCyph
         "contraindication_check",
         "condition_treatment_options"
     }
+
+    try:
+        with open("debug.log", "a") as f:
+            f.write(f"QUESTION: {question}\nRESULT: intent={result.intent}, cypher={result.cypher_query}, params={result.parameters}\n\n")
+    except Exception as le:
+        pass
 
     if result.intent not in ALLOWED_INTENTS or not result.cypher_query:
         result.intent = "unknown"

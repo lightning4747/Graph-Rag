@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './chat.module.css';
 import ChatResponse, { QueryResponse } from '@/components/ChatResponse';
+import { formatErrorDetail } from '@/lib/error';
 
 interface User {
   user_id: string;
@@ -23,6 +24,15 @@ interface ChatDashboardProps {
   user: User;
 }
 
+// Autocomplete suggestions config
+const PATIENTS_POOL = [
+  'CASE_9942A',
+  'PATIENT_QUARANTINE_TEST',
+  'CASE_interaction_test_patient',
+  'CASE_contraindication_test_patient',
+  'CASE_dosage_test_patient'
+];
+
 export default function ChatDashboard({ user }: ChatDashboardProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [question, setQuestion] = useState('');
@@ -32,15 +42,6 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
   const router = useRouter();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Autocomplete suggestions config
-  const PATIENTS_POOL = [
-    'CASE_9942A',
-    'PATIENT_QUARANTINE_TEST',
-    'CASE_interaction_test_patient',
-    'CASE_contraindication_test_patient',
-    'CASE_dosage_test_patient'
-  ];
 
   const [filteredPatients, setFilteredPatients] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -52,9 +53,11 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
   useEffect(() => {
     const trimmed = patientId.trim();
     if (trimmed.length < 2) {
-      setFilteredPatients([]);
-      setShowSuggestions(false);
-      return;
+      const handler = setTimeout(() => {
+        setFilteredPatients([]);
+        setShowSuggestions(false);
+      }, 0);
+      return () => clearTimeout(handler);
     }
 
     const handler = setTimeout(() => {
@@ -108,7 +111,8 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
   }, [messages, isLoading]);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleLogout = async () => {
@@ -165,7 +169,7 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
           const rawText = await res.text();
           try {
             const errJson = JSON.parse(rawText);
-            errorDetail = errJson.detail || errJson.error || '';
+            errorDetail = formatErrorDetail(errJson.detail || errJson.error || '');
             returnedType = errJson.type || '';
           } catch {
             errorDetail = rawText;
@@ -202,7 +206,7 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
         };
         setMessages((prev) => [...prev, fallbackMsg]);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Network failure / Circuit open from opossum proxy route
       const networkErrorMsg: Message = {
         id: `assistant-${Date.now()}`,
@@ -210,7 +214,7 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
         text: 'The backend service is currently unreachable.',
         response: {
           type: 'circuit_open',
-          text: err.message || 'Network connectivity issue or remote service failure.',
+          text: (err instanceof Error ? err.message : '') || 'Network connectivity issue or remote service failure.',
           facts: [],
         },
       };
@@ -233,11 +237,7 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
     setPatientId(pid || '');
   };
 
-  const getRoleBadgeClass = (role: string) => {
-    if (role === 'doctor') return styles.badgeDoctor;
-    if (role === 'reviewer') return styles.badgeReviewer;
-    return styles.badgeAdmin;
-  };
+
 
   return (
     <div className={styles.container}>
@@ -245,35 +245,7 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
       <aside className={styles.sidebar} aria-label="Session Navigation">
         <div className={styles.sidebarTop}>
           <div className={styles.logoArea}>
-            <svg
-              className={styles.logoIcon}
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
             <span className={styles.logoText}>Clinical GraphRAG</span>
-          </div>
-
-          <div className={styles.sessionCard}>
-            <span className={styles.sessionTitle}>Authorized Session</span>
-            <div className={styles.sessionDetail}>
-              <strong>ID:</strong> {user.user_id}
-            </div>
-            {user.license_num && (
-              <div className={styles.sessionDetail}>
-                <strong>License:</strong> {user.license_num}
-              </div>
-            )}
-            <span className={`${styles.badge} ${getRoleBadgeClass(user.role)}`}>
-              {user.role}
-            </span>
           </div>
 
           <nav className={styles.navLinks} aria-label="Dashboard Navigation">
@@ -291,6 +263,41 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
               <span>Clinical Chat</span>
+            </Link>
+
+            <Link href="/ingest" className={styles.link}>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              <span>Ingestion Console</span>
+            </Link>
+
+            <Link href="/patients" className={styles.link}>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              <span>Patient Directory</span>
             </Link>
 
             {(user.role === 'reviewer' || user.role === 'admin') && (
@@ -342,8 +349,7 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
       {/* Right Main Panel */}
       <main className={styles.mainPanel} aria-label="Clinical Chat Workspace">
         <header className={styles.headerBar}>
-          <span className={styles.headerTitle}>Active Consultation</span>
-          <span style={{ fontSize: '12px', color: '#64748b' }}>Deterministic Hallucination Filter: Active</span>
+          <span className={styles.headerTitle}>Consultation</span>
         </header>
 
         {/* Message Thread */}
@@ -354,7 +360,7 @@ export default function ChatDashboard({ user }: ChatDashboardProps) {
         >
           {messages.length === 0 ? (
             <div className={styles.welcomeCard}>
-              <h2 className={styles.welcomeTitle}>Welcome, {user.role === 'admin' ? 'Administrator' : 'Doctor'}</h2>
+              <h2 className={styles.welcomeTitle}>Examples</h2>
               <p className={styles.welcomeText}>
                 Ask clinical questions about dosage limits, drug interactions, active prescriptions, contraindications,
                 or treatment options. All answers are grounded in structured graph records and number-verified.
