@@ -86,11 +86,7 @@ def generate_cypher(question: str, patient_id: str | None = None) -> DynamicCyph
         "condition_treatment_options"
     }
 
-    try:
-        with open("debug.log", "a") as f:
-            f.write(f"QUESTION: {question}\nRESULT: intent={result.intent}, cypher={result.cypher_query}, params={result.parameters}\n\n")
-    except Exception as le:
-        pass
+
 
     if result.intent not in ALLOWED_INTENTS or not result.cypher_query:
         result.intent = "unknown"
